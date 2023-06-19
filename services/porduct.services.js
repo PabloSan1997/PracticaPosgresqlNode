@@ -1,25 +1,29 @@
 const { pool } = require("../db/config");
-
+const { v4: uuidv4 } = require("uuid");
+const { sequelize } = require("../db/sequelize");
+const { models } = sequelize;
 class ServicioProducts {
-    async leerProductos(){
-            const data = await pool.query("SELECT * FROM productos");
-            return data.rows;
-    }
-    async agregarProducto(cuerpo){
-        const {id, nombre, categoria, guardado} = cuerpo;
-        const texto = "INSERT INTO productos (id, nombre, categoria, guardado) VALUES($1, $2, $3, $4) RETURNING *";
-        const result = await pool.query(texto, [id, nombre, categoria, guardado]);
-        return result.rows[0];
-    }
-    async editarProducto({id, nombre, categoria, guardado}){
-        const testo = "UPDATE productos SET nombre = $2, categoria = $3, guardado=$4 WHERE id = $1 RETURNING *";
-        const result = await pool.query(testo, [id, nombre, categoria, guardado]);
-        return result.rows[0];
-    }
-    async borrarProducto(id){
-        await pool.query("DELETE FROM productos WHERE id = $1", [id]);
-        return {message:"ELemento borrado con exito"}
-    }
+  async leerProductos() {
+    // const [data] = await sequelize.query("SELECT * FROM productos");
+    const data = await models.Productos.findAll();
+    return data;
+  }
+  async agregarProducto(cuerpo) {
+    const id = uuidv4();
+    const result = await models.Productos.create({ ...cuerpo, id });
+    return result;
+  }
+  async editarProducto(cuerpo) {
+    const { id } = cuerpo;
+    const data = await models.Productos.findOne({ id });
+    const mira = await data.update(cuerpo);
+    return mira;
+  }
+  async borrarProducto(id) {
+    const borrar = await models.Productos.findOne({id});
+    await borrar.destroy();
+    return { message: "ELemento borrado con exito" };
+  }
 }
 
-module.exports = {ServicioProducts}
+module.exports = { ServicioProducts };

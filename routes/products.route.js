@@ -27,7 +27,7 @@ routeProduct.delete("/", async (req, res)=>{
        res.status(404).json({message:"no se pudo"});
     }
 });
-routeProduct.put("/", async (req, res)=>{
+routeProduct.patch("/", async (req, res)=>{
     try {
         const data = await servicios.editarProducto(req.body);
         res.json(data);
